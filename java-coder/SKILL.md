@@ -48,13 +48,19 @@ Use this skill when the user wants to:
 
 ## On null handling
 
-- When interacting with APIs which explicitly mention that they can return null:
-  - Ensure the null case is handled appropriately.
-- When interacting with ambiguous APIs:
-  - Assume the API can return null. 
-- On code we are writing:
-  - Use the jSpecify dependency annotations to embrace a non-null by default. 
-  - Mark using annotations where null can be given.  
+- Prefer explicit nullability contracts over defensive null checks.
+- For code we own, use JSpecify:
+  - Put `@NullMarked` on packages using `package-info.java`.
+  - Treat unannotated types in `@NullMarked` packages as non-null.
+  - Do not add `x == null` checks for values whose declared contract is non-null.
+  - Use `@Nullable` only where null is part of the real API contract.
+- At external trust boundaries, such as JSON deserialization, HTTP requests, database rows, environment variables, and third-party APIs:
+  - Decide whether null is valid input.
+  - If null is valid, mark it with `@Nullable` and handle it once at the boundary.
+  - If null is invalid, reject it once at the boundary using validation or `Objects.requireNonNull`.
+- Do not add speculative null checks merely because Java permits null.
+- When interacting with APIs explicitly documented as nullable, handle the null case.
+- When interacting with ambiguous third-party APIs, isolate the uncertainty at the call site and convert into a non-null domain value as early as practical.
 
 ## On logging
 
@@ -64,6 +70,7 @@ Use this skill when the user wants to:
 
 ## On testing
 
+- Use assertJ for assertions.
 
 # Dependency Management 
 
