@@ -25,12 +25,56 @@ Use this skill when the user wants to:
 
 # Coding Style
 
+## On style
+
 - Do not add the `final` keyword to arguments which are already effectively final.
   - Only add the `final` keyword to arguments if there is a good reason. 
-- On dates and times:
-  - Use the `java.time` package when managing dates and times.
-  - Where an overload for a static method exists that has a clock e.g. `Instant.now(Clock clock)` be sure to use the overload.
-    - If the class does not have a field for the clock then add it as a field.  
-  - Do not use `java.util.Date` and `java.util.Calendar` unless having to interact with legacy code.
-    - For new code which is written convert the legacy `Date` to an `Instant` and legacy `Calendar` to `ZonedDateTime` 
-      and operate on that instead.
+- Never return null from a method. If an indication of absense is needed return an `Optional`.
+- Do not create interfaces when there will only be a single implementation.
+  - If other implementation(s) are required for tests then use mocking rather than creating the interface.
+- Where you need a dumb data carrier use records.
+- JDK14+: Use algebraic data types (through sealed hierarchies) when the domain nicely fits. 
+  - Prefer algebraic data types (ADTs) over the visitor pattern.
+
+## On dates and times
+
+- Use the `java.time` package when managing dates and times.
+- Where an overload for a static method exists that has a clock e.g. `Instant.now(Clock clock)` be sure to use the overload.
+  - If the class does not have a field for the `Clock` then add it as a field and constructor inject it.
+- Unless you specifically require a time zone offset as well, always use `Instant` for datetimes/timestamps (so we have it in UTC by default). 
+- Do not use `java.util.Date` and `java.util.Calendar` unless having to interact with legacy code.
+  - For new code which is written convert the legacy `Date` to an `Instant` and legacy `Calendar` to `ZonedDateTime` 
+    and operate on that instead.
+
+## On null handling
+
+- When interacting with APIs which explicitly mention that they can return null:
+  - Ensure the null case is handled appropriately.
+- When interacting with ambiguous APIs:
+  - Assume the API can return null. 
+- On code we are writing:
+  - Use the jSpecify dependency annotations to embrace a non-null by default. 
+  - Mark using annotations where null can be given.  
+
+## On logging
+
+- Use the SLF4J API for logging.
+- Mask any PII, secrets, passwords in log output.
+- Log judiciously at DEBUG and TRACE and only at INFO when it makes sense to always output something. 
+
+## On testing
+
+
+# Dependency Management 
+
+- When a dependency is added into a build file add a comment explaining why this dependency is needed, i.e., what functionality it provides for the app.
+- On BOM usage:
+  - Use the latest versions of the BOMs which are stated to be compatible with each other.
+  - Elide specific versions for dependencies contained within the BOM. 
+- Spring Boot BOMs: 
+  - org.springframework.boot:spring-boot-dependencies
+  - org.springframework.cloud:spring-cloud-dependencies
+  - io.awspring.cloud:spring-cloud-aws-dependencies
+- AWS BOMs:
+  - software.amazon.awssdk:bom 
+  - software.amazon.awscdk:bom
