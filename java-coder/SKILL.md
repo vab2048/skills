@@ -31,10 +31,45 @@ Use this skill when the user wants to:
   - Only add the `final` keyword to arguments if there is a good reason. 
 - Never return null from a method. If an indication of absense is needed return an `Optional`.
 - Do not create interfaces when there will only be a single implementation.
-  - If other implementation(s) are required for tests then use mocking rather than creating the interface.
-- Where you need a dumb data carrier use records.
-- JDK14+: Use algebraic data types (through sealed hierarchies) when the domain nicely fits. 
-  - Prefer algebraic data types (ADTs) over the visitor pattern.
+   - If other implementation(s) are required for tests then use mocking rather than creating the interface.
+- Prefer immutability over mutability.
+   - Mutability for loop variables and other obvious use cases is perfectly acceptable.
+   - Mutability which improves readability, is acceptable. If this is done put a comment explaining why.
+- JDK9+: 
+   - Use the `.of()` factory method for creating immutable collections rather than using `Collections.unmodifiable<>`
+      - Specifically for Maps do not use `Map.of()` but use `Map.ofEntries()` instead. 
+   - Use the `copyOf()` method for creating immutable copies of existing collections.
+- JDK14+:
+   - Prefer switch expressions over switch statements when possible.
+- JDK15+: 
+   - Use text blocks for multi-line strings. Also use text blocks when the string is a template/code snippet e.g., for JSON or SQL.
+- JDK16+: 
+   - When needed use instanceof pattern matching to combine a type check and cast into one step.
+   - Use records when you need a "dumb data carrier"/data class rather than normal classes.
+- JDK17+:
+   - Where possible when creating type hierarchies, use sealed classes/interfaces to restrict which classes can extend a type and enable exhaustive switches.
+   - Use algebraic data types (through sealed hierarchies) when the domain nicely fits.
+      - Prefer algebraic data types (ADTs) over the visitor pattern. 
+- JDK21+: 
+   - Replace if-else instanceof chains with clean switch type patterns. 
+   - Destructure records directly in patterns: extract fields in one step.
+   - For switch: 
+      - prefer exhaustive switch expressions so the compiler verifies all sealed subtypes are covered and no default case is needed.
+      - add conditions to pattern cases using "when" guards to reduce boilerplate and improve readability.
+      - if required, add a null case in the switch itself (only if required).
+   - Collections:
+      - Use the sequenced collection API additions (`getLast()`, `getFirst()`, `reversed()`)to access first/last elements and reverse views rather than raw indexes. 
+      - Use the `reversed()` method on `List` when needed in loops rather than an iterator with `previous()`.
+   - APIs:
+      - Use the `Math.clamp()` method when needed to clamp a value between two bounds rather than using `Math.min()` and `Math.max()`. 
+- JDK22+:
+   - Use unnamed variables with `_` to signal intent when a variable is intentionally unused.
+- JDK23+: 
+   - Prefer usage of markdown (with ///) for Javadoc comments rather than the old HTML used in /** */ comments.
+- JDK25+: 
+   - Use flexible constructor bodies to avoid unnecessary static method creation and to validate/compute values before calling super() or this().
+   - If needed you can use primitive types within pattern matching. 
+
 
 ## On dates and times
 
@@ -71,6 +106,17 @@ Use this skill when the user wants to:
 ## On testing
 
 - Use assertJ for assertions.
+- Use the awaitility library for async assertions. 
+   - Do not add `Thread.sleep()` in tests.
+
+## On refactoring
+
+- When you change existing code which contains comments, be sure to keep the comments and not lose them.
+   - Also make sure (if needed) to edit the comment so it is still accurate. 
+
+## On Spring Boot and Spring Framework usage
+
+- Create strongly typed `@ConfigurationProperties` when needed and inject the types rather than using raw `@Value()` annotations on fields.
 
 # Dependency Management 
 
@@ -85,3 +131,7 @@ Use this skill when the user wants to:
 - AWS BOMs:
   - software.amazon.awssdk:bom 
   - software.amazon.awscdk:bom
+
+# Misc
+
+- Always use LF line endings for .java files, even on Windows.
