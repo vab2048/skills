@@ -1,0 +1,4 @@
+interface:
+  display_name: "CDK Coder"
+  short_description: "AWS CDK infrastructure coding and refactoring"
+  default_prompt: "Use $cdk-coder to create or refactor AWS CDK stacks."
