@@ -36,4 +36,7 @@ With the env var set, you can ask codex what skills it recognizes and the ones i
 
 - https://cursor.com/docs/skills
 - https://javaevolved.github.io/
-  - Very useful for the java-coder skill. 
+   - Very useful for the java-coder skill. 
+- https://blog.frankel.ch/writing-agent-skill/
+   - Good tips on writing an agent skill. 
+
