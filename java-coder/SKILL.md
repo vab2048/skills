@@ -6,9 +6,10 @@ description: >-
   JUnit, Mockito, packages, modules, generics, annotations, records, exceptions,
   concurrency, dependency injection, serialization, or Java build and quality
   tooling.
-version: 0.0.1
-author: vab2048
 license: GNU GPLv3
+metadata:
+  version: 0.0.1
+  author: vab2048
 ---
 
 # When to Use
@@ -66,9 +67,58 @@ Use this skill when the user wants to:
    - Use unnamed variables with `_` to signal intent when a variable is intentionally unused.
 - JDK23+: 
    - Prefer usage of markdown (with ///) for Javadoc comments rather than the old HTML used in /** */ comments.
-- JDK25+: 
+- JDK25+:
    - Use flexible constructor bodies to avoid unnecessary static method creation and to validate/compute values before calling super() or this().
    - If needed you can use primitive types within pattern matching. 
+
+# Code Structure
+
+## Procedural methods and constructors
+
+- For a method or constructor that coordinates three or more distinct operations, structure its main body as a
+  readable sequence of named steps.
+- Keep the coordinating method at the orchestration level.
+  - Extract detailed construction, transformation, validation, or persistence logic into purpose-named private
+    methods when this makes the sequence easier to understand (or package-private if it makes sense to have tests).
+  - Name extracted methods after the outcome they produce, such as `createDomainIdentity()` or
+    `publishConnectionOutputs()`.
+- Add method-level Javadoc that:
+  - States the overall outcome.
+  - Lists the steps in execution order.
+  - Identifies important side effects, resources created, and lifecycle boundaries.
+- Add an inline `Step N:` comment immediately before each corresponding section.
+  - Explain the purpose or reason for the step, not merely what the syntax does.
+  - Keep its terminology and ordering consistent with the method-level Javadoc.
+- Make important hidden side effects explicit near the call that causes them.
+  - For example, if a builder call implicitly creates several infrastructure resources, document their number and
+    types.
+- Preserve existing comments and update them when refactoring changes a step's responsibility or ordering.
+- Do not use numbered steps for simple methods, ordinary getters, small calculations, or self-explanatory control
+  flow.
+
+Example:
+
+```java
+/// Provisions the capability in four steps:
+///
+/// 1. Validate and resolve its external dependencies.
+/// 2. Create the primary resource and its automatically managed supporting resources.
+/// 3. Create supporting resources that require an explicit policy.
+/// 4. Publish non-secret outputs for consumers.
+CapabilityStack(...) {
+    // Step 1: Resolve externally owned dependencies before defining managed resources.
+    DependencyReferences references = resolveDependencies(properties);
+
+    // Step 2: Create the primary resource and its automatically generated supporting resources.
+    PrimaryResource resource = createPrimaryResource(references, properties);
+
+    // Step 3: Add the explicit policy that the primary construct cannot infer.
+    createPolicyResource(references, properties);
+
+    // Step 4: Publish the stable, non-secret values consumers need.
+    publishOutputs(resource, properties);
+}
+```
 
 
 ## On dates and times
@@ -80,6 +130,7 @@ Use this skill when the user wants to:
 - Do not use `java.util.Date` and `java.util.Calendar` unless having to interact with legacy code.
   - For new code which is written convert the legacy `Date` to an `Instant` and legacy `Calendar` to `ZonedDateTime` 
     and operate on that instead.
+- If writing datetime manipulation code, extract out a named variable for intermediate calculations rather than putting magic numbers inline without any
 
 ## On null handling
 
@@ -102,21 +153,35 @@ Use this skill when the user wants to:
 - Use the SLF4J API for logging.
 - Mask any PII, secrets, passwords in log output.
 - Log judiciously at DEBUG and TRACE and only at INFO when it makes sense to always output something. 
+- Add the logger to the class as a static final field called `log` (note the lower case).
 
 ## On testing
 
 - Use assertJ for assertions.
 - Use the awaitility library for async assertions. 
    - Do not add `Thread.sleep()` in tests.
+- When generating dummy variables, put "dummy" (adjust for case as needed) in the variable name if it helps. This includes env vars.  
 
 ## On refactoring
 
 - When you change existing code which contains comments, be sure to keep the comments and not lose them.
    - Also make sure (if needed) to edit the comment so it is still accurate. 
+- When you are renaming a class which exists in git make sure it appears in git as a rename rather than a delete and add.
+
+## On security
+
+- If a property is intended to be a secret, never put the actual secret as a value but instead refer to it through env vars.
+
+## On Documentation
+
+- All classes and (public) methods should have Javadoc comments which explain their purpose/intent.
+   - Do not put comments for simple getters and setters.
+- Add a method-level comment to a non-public method when its purpose is not apparent from its name and signature.
 
 ## On Spring Boot and Spring Framework usage
 
 - Create strongly typed `@ConfigurationProperties` when needed and inject the types rather than using raw `@Value()` annotations on fields.
+- If a configuration property is intended to be a secret, when populating a properties file put the value as an env var and put a comment indicating this is a secret.
 
 # Dependency Management 
 
