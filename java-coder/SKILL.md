@@ -73,6 +73,23 @@ Use this skill when the user wants to:
 
 # Code Structure
 
+## Modularity
+
+- Follow Java Platform Module System design principles even when the project does not contain a `module-info.java`.
+- Do not create split packages by default.
+  - A package should be owned by exactly one logical module or deployable artifact.
+  - Do not add classes to a package provided by another module, dependency, JAR, or separately deployed component.
+  - Allow a split package only when it is necessary to access or extend package-private functionality and no supported public API provides a practical alternative.
+    - Verify that the dependency is not a sealed JAR and that the application will run on the classpath rather than as named JPMS modules.
+    - Keep the exception isolated, document the affected API and reason for it, and add tests that detect incompatibility when the dependency is upgraded.
+    - Treat the split package as deliberate technical debt and do not place unrelated code in it.
+- Keep module dependencies explicit and acyclic where practical.
+- Treat packages as module boundaries:
+  - Expose only packages intended for consumption by other modules.
+  - Keep implementation details in non-exported, module-specific packages.
+  - Do not rely on another module's internal packages unless using the documented split-package exception.
+- If an existing split package is discovered, do not add to it unless the documented exception applies. Report it and, when refactoring is in scope, consolidate or rename the affected packages.
+
 ## Procedural methods and constructors
 
 - For a method or constructor that coordinates three or more distinct operations, structure its main body as a
