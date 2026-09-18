@@ -1,6 +1,10 @@
 # Created by https://www.gitignore.io/api/java,emacs,gradle,intellij,java-web
 # Edit at https://www.gitignore.io/?templates=java,emacs,gradle,intellij,java-web
 
+
+# Folder codex creates and places files in independent of our definitions.
+.system/
+
 ### Emacs ###
 # -*- mode: gitignore; -*-
 *~
