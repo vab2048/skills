@@ -1,4 +1,4 @@
-﻿---
+---
 name: breadcrumb
 disable-model-invocation: true
 description: >-

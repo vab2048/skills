@@ -1,2 +1,6 @@
+interface:
+  display_name: "Breadcrumb"
+  short_description: "Summarize session state for later continuation"
+
 policy:
   allow_implicit_invocation: false
