@@ -11,7 +11,11 @@ description: >-
 Only on explicit user invocation, leave a chat summary of the preceding work
 that lets the user resume without rereading the conversation.
 
-Write exactly five bullets. Aim for one or two sentences each, expanding only
+Accept an optional positive integer argument: `/breadcrumb N` (for example,
+`/breadcrumb 5`) requests N ordered sub-items under **Next**. Without an
+argument, give only the immediate next action as prose.
+
+Write exactly five top-level bullets. Aim for one or two sentences each, expanding only
 to preserve constraints, task hierarchy, or an unambiguous stopping point.
 
 - **Goal:** Overall task and intended outcome.
@@ -26,7 +30,11 @@ to preserve constraints, task hierarchy, or an unambiguous stopping point.
   item from the current one.
 - **Next:** First concrete action, respecting agreed order and pending decisions
   or prerequisites. For detours, identify the immediate return point and its
-  conditions.
+  conditions. When a count is supplied, put the immediate resumption action
+  first in an ordered sublist, followed by the known sequence up to that count.
+  Preserve prerequisites and distinguish agreed actions from exploratory options.
+  If fewer steps are known, include only those and state that limitation;
+  do not invent work to fill the count. Keep the other four bullets concise.
 
 If complete, identify the final outcome and say there is no agreed next action
 unless follow-up was already agreed. Do not invent tasks or relationships.
