@@ -30,7 +30,7 @@ Use this skill when the user wants to:
 
 - Do not add the `final` keyword to arguments which are already effectively final.
   - Only add the `final` keyword to arguments if there is a good reason. 
-- Never return null from a method. If an indication of absense is needed return an `Optional`.
+- Never return null from a method. If a sign of absense is needed, return an `Optional`.
 - Do not create interfaces when there will only be a single implementation.
    - If other implementation(s) are required for tests then use mocking rather than creating the interface.
 - Prefer immutability over mutability.
@@ -72,6 +72,53 @@ Use this skill when the user wants to:
    - If needed you can use primitive types within pattern matching. 
 
 # Code Structure
+
+## On naming
+
+These rules apply to all Java code. The examples illustrate naming decisions; choose names from the application's own
+domain.
+
+- Name variables, fields, record components, and methods after the concepts they represent. Include the role or
+  relationship that distinguishes them from other concepts used together. For example, `billingAddress` and
+  `deliveryAddress` identify different roles of an address;
+  `buildProjectUser` identifies the user associated with a build project.
+- Distinguish an object from its identifier, name, contents, or a resource that stores those values. For example,
+  `customer` and `customerId` represent different things. Similarly, `buildProject` is a project resource,
+  `buildProjectName` is its name, and `buildProjectSsmParameter` is the SSM parameter that stores that name.
+- Use established domain terminology. For example, `logGroup` identifies a CloudWatch log group, while `logs` suggests
+  log entries or output. Include service or resource terms when they identify what the object represents, rather than
+  mechanically appending its Java type.
+- Keep names concise where the enclosing context already identifies the role. For example,
+  `BuildProjectResources.project()` and `.logGroup()` are clear within that type. Where build and deploy resources are
+  used together, distinguish them with names such as `buildProject` and `deployProject`.
+- Introduce a meaningfully named local when repeated nested access obscures the value being used. Preserve behaviour:
+  a local is appropriate when the value can be read once and reused; retain separate evaluations when their timing or
+  side effects matter.
+  - TODO: When the project's Java version and enabled language features support enhanced local variable declarations
+    (JEP draft 8357464), favour record patterns that bind the required components directly to meaningful names and avoid
+    repeated accessor chains.
+- Name methods after their operation or outcome. When callers need to distinguish operations for different domain roles,
+  include that distinction in the method names. For example, `createTriggerUserForBuildProject` and
+  `createTriggerUserForDeployProject` distinguish the project each user will access.
+- Use consistent domain terms in identifiers and comments.
+
+Example: naming a repeatedly accessed value in an order-processing application, where the customer's email address
+remains unchanged during these calls.
+
+Before:
+
+```java
+sendReceipt(order.customer().emailAddress());
+recordReceiptRecipient(order.customer().emailAddress());
+```
+
+After:
+
+```java
+var customerEmailAddress = order.customer().emailAddress();
+sendReceipt(customerEmailAddress);
+recordReceiptRecipient(customerEmailAddress);
+```
 
 ## Modularity
 
@@ -191,9 +238,41 @@ CapabilityStack(...) {
 
 ## On Documentation
 
-- All classes and (public) methods should have Javadoc comments which explain their purpose/intent.
-   - Do not put comments for simple getters and setters.
+These rules apply to comments in all Java code. The examples illustrate the principles; use terminology from the
+application's own domain.
+
+- Add Javadoc to classes and public methods explaining their purpose or intent.
+  - Omit comments for simple getters and setters.
 - Add a method-level comment to a non-public method when its purpose is not apparent from its name and signature.
+- Write for a reader who can inspect the surrounding code but has no conversation history. State the purpose or outcome
+  using concrete domain nouns and precise verbs.
+- When describing an interaction or permission, identify the actor, the operations, and the objects involved. Include
+  the source, destination, or scope when it determines what is read, changed, created, or permitted.
+- Replace vague labels with the specific information they stand for. For example, write "read the source bucket name
+  from SSM Parameter Store" instead of "read configuration", and "start, check, and stop builds" instead of "control
+  builds". Use terminology established in the codebase.
+- Keep each comment focused on its purpose. Include details that explain behaviour, scope, constraints, or reasoning;
+  leave syntax and mechanical implementation details in the code. Match the detail to the subject: a permission summary
+  may need several concrete operations, while a stack summary may need only one sentence describing its responsibility.
+- Before finishing, review each added or changed comment. Replace wording that leaves the reader asking "which object?",
+  "which operation?", or "whose resource?". Verify the explanation against the code.
+
+Example from AWS infrastructure code: make the runner's permissions and their scope explicit. The same principle applies
+to interactions and permissions in other domains.
+
+Before:
+
+```java
+/// Creates an IAM user with source-upload, configuration-read, build-control, and log-read permissions.
+```
+
+After:
+
+```java
+/// Creates an IAM user for a CI/CD runner to upload repository ZIPs to the shared S3 bucket, read the bucket name and
+/// assigned CodeBuild project name from SSM Parameter Store, start, check, and stop builds in that project, and read
+/// build output from its CloudWatch log group.
+```
 
 ## On Spring Boot and Spring Framework usage
 
